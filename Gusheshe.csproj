@@ -66,6 +66,7 @@
   </ItemGroup>
   <ItemGroup>
     <Compile Include="Data\SQLiteHelper.cs" />
+    <Compile Include="Data\TermManagementHelper.cs" />
     <Compile Include="FeesPayment.cs">
       <SubType>Form</SubType>
     </Compile>

@@ -29,6 +29,8 @@
         private void InitializeComponent()
         {
             this.panel1 = new System.Windows.Forms.Panel();
+            this.cbFirstName = new System.Windows.Forms.ComboBox();
+            this.statusLabel = new System.Windows.Forms.Label();
             this.cbClass = new System.Windows.Forms.ComboBox();
             this.label6 = new System.Windows.Forms.Label();
             this.cbItemName = new System.Windows.Forms.ComboBox();
@@ -44,14 +46,9 @@
             this.txtTotal = new System.Windows.Forms.TextBox();
             this.groupBox1 = new System.Windows.Forms.GroupBox();
             this.btnPrint = new System.Windows.Forms.Button();
-            this.btnShowReceipt = new System.Windows.Forms.Button();
             this.btnCompleteSale = new System.Windows.Forms.Button();
             this.btnDeleteItem = new System.Windows.Forms.Button();
             this.dgvCart = new System.Windows.Forms.DataGridView();
-            this.rtbReceipt = new System.Windows.Forms.RichTextBox();
-            this.btnBack = new System.Windows.Forms.Button();
-            this.statusLabel = new System.Windows.Forms.Label();
-            this.cbFirstName = new System.Windows.Forms.ComboBox();
             this.ItemName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Quantity = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.UnitPrice = new System.Windows.Forms.DataGridViewTextBoxColumn();
@@ -59,10 +56,32 @@
             this.FirstName = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Studentname = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Class = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.rtbReceipt = new System.Windows.Forms.RichTextBox();
+            this.btnBack = new System.Windows.Forms.Button();
+            this.panel2 = new System.Windows.Forms.Panel();
+            this.lblDisplay = new System.Windows.Forms.TextBox();
+            this.btn1 = new System.Windows.Forms.Button();
+            this.btn2 = new System.Windows.Forms.Button();
+            this.btn3 = new System.Windows.Forms.Button();
+            this.btnClear = new System.Windows.Forms.Button();
+            this.btnSubtract = new System.Windows.Forms.Button();
+            this.btn6 = new System.Windows.Forms.Button();
+            this.btn5 = new System.Windows.Forms.Button();
+            this.btn4 = new System.Windows.Forms.Button();
+            this.btnAdd = new System.Windows.Forms.Button();
+            this.btn9 = new System.Windows.Forms.Button();
+            this.btn8 = new System.Windows.Forms.Button();
+            this.btn7 = new System.Windows.Forms.Button();
+            this.btnDivide = new System.Windows.Forms.Button();
+            this.btn0 = new System.Windows.Forms.Button();
+            this.btnDot = new System.Windows.Forms.Button();
+            this.btnMultiply = new System.Windows.Forms.Button();
+            this.btnEquals = new System.Windows.Forms.Button();
             this.panel1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.numQty)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).BeginInit();
+            this.panel2.SuspendLayout();
             this.SuspendLayout();
             // 
             // panel1
@@ -87,6 +106,23 @@
             this.panel1.Name = "panel1";
             this.panel1.Size = new System.Drawing.Size(291, 264);
             this.panel1.TabIndex = 0;
+            // 
+            // cbFirstName
+            // 
+            this.cbFirstName.FormattingEnabled = true;
+            this.cbFirstName.Location = new System.Drawing.Point(168, 8);
+            this.cbFirstName.Name = "cbFirstName";
+            this.cbFirstName.Size = new System.Drawing.Size(100, 21);
+            this.cbFirstName.TabIndex = 13;
+            // 
+            // statusLabel
+            // 
+            this.statusLabel.AutoSize = true;
+            this.statusLabel.Location = new System.Drawing.Point(29, 11);
+            this.statusLabel.Name = "statusLabel";
+            this.statusLabel.Size = new System.Drawing.Size(57, 13);
+            this.statusLabel.TabIndex = 12;
+            this.statusLabel.Text = "First Name";
             // 
             // cbClass
             // 
@@ -204,7 +240,6 @@
             // groupBox1
             // 
             this.groupBox1.Controls.Add(this.btnPrint);
-            this.groupBox1.Controls.Add(this.btnShowReceipt);
             this.groupBox1.Controls.Add(this.btnCompleteSale);
             this.groupBox1.Controls.Add(this.btnDeleteItem);
             this.groupBox1.Controls.Add(this.dgvCart);
@@ -225,19 +260,9 @@
             this.btnPrint.UseVisualStyleBackColor = true;
             this.btnPrint.Click += new System.EventHandler(this.btnPrint_Click);
             // 
-            // btnShowReceipt
-            // 
-            this.btnShowReceipt.Location = new System.Drawing.Point(380, 197);
-            this.btnShowReceipt.Name = "btnShowReceipt";
-            this.btnShowReceipt.Size = new System.Drawing.Size(115, 23);
-            this.btnShowReceipt.TabIndex = 14;
-            this.btnShowReceipt.Text = "Show Receipt";
-            this.btnShowReceipt.UseVisualStyleBackColor = true;
-            this.btnShowReceipt.Click += new System.EventHandler(this.btnShowReceipt_Click);
-            // 
             // btnCompleteSale
             // 
-            this.btnCompleteSale.Location = new System.Drawing.Point(185, 197);
+            this.btnCompleteSale.Location = new System.Drawing.Point(191, 197);
             this.btnCompleteSale.Name = "btnCompleteSale";
             this.btnCompleteSale.Size = new System.Drawing.Size(115, 23);
             this.btnCompleteSale.TabIndex = 13;
@@ -270,41 +295,6 @@
             this.dgvCart.Name = "dgvCart";
             this.dgvCart.Size = new System.Drawing.Size(747, 150);
             this.dgvCart.TabIndex = 0;
-            // 
-            // rtbReceipt
-            // 
-            this.rtbReceipt.Location = new System.Drawing.Point(508, 57);
-            this.rtbReceipt.Name = "rtbReceipt";
-            this.rtbReceipt.Size = new System.Drawing.Size(298, 238);
-            this.rtbReceipt.TabIndex = 2;
-            this.rtbReceipt.Text = "";
-            // 
-            // btnBack
-            // 
-            this.btnBack.Location = new System.Drawing.Point(885, 529);
-            this.btnBack.Name = "btnBack";
-            this.btnBack.Size = new System.Drawing.Size(71, 23);
-            this.btnBack.TabIndex = 16;
-            this.btnBack.Text = "Back";
-            this.btnBack.UseVisualStyleBackColor = true;
-            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
-            // 
-            // statusLabel
-            // 
-            this.statusLabel.AutoSize = true;
-            this.statusLabel.Location = new System.Drawing.Point(29, 11);
-            this.statusLabel.Name = "statusLabel";
-            this.statusLabel.Size = new System.Drawing.Size(57, 13);
-            this.statusLabel.TabIndex = 12;
-            this.statusLabel.Text = "First Name";
-            // 
-            // cbFirstName
-            // 
-            this.cbFirstName.FormattingEnabled = true;
-            this.cbFirstName.Location = new System.Drawing.Point(168, 8);
-            this.cbFirstName.Name = "cbFirstName";
-            this.cbFirstName.Size = new System.Drawing.Size(100, 21);
-            this.cbFirstName.TabIndex = 13;
             // 
             // ItemName
             // 
@@ -341,11 +331,241 @@
             this.Class.HeaderText = "Class";
             this.Class.Name = "Class";
             // 
+            // rtbReceipt
+            // 
+            this.rtbReceipt.Location = new System.Drawing.Point(563, 35);
+            this.rtbReceipt.Name = "rtbReceipt";
+            this.rtbReceipt.Size = new System.Drawing.Size(263, 263);
+            this.rtbReceipt.TabIndex = 2;
+            this.rtbReceipt.Text = "";
+            // 
+            // btnBack
+            // 
+            this.btnBack.Location = new System.Drawing.Point(885, 529);
+            this.btnBack.Name = "btnBack";
+            this.btnBack.Size = new System.Drawing.Size(71, 23);
+            this.btnBack.TabIndex = 16;
+            this.btnBack.Text = "Back";
+            this.btnBack.UseVisualStyleBackColor = true;
+            this.btnBack.Click += new System.EventHandler(this.btnBack_Click);
+            // 
+            // panel2
+            // 
+            this.panel2.BorderStyle = System.Windows.Forms.BorderStyle.Fixed3D;
+            this.panel2.Controls.Add(this.btnEquals);
+            this.panel2.Controls.Add(this.btnMultiply);
+            this.panel2.Controls.Add(this.btnDivide);
+            this.panel2.Controls.Add(this.btn0);
+            this.panel2.Controls.Add(this.btnDot);
+            this.panel2.Controls.Add(this.btnAdd);
+            this.panel2.Controls.Add(this.btn9);
+            this.panel2.Controls.Add(this.btn8);
+            this.panel2.Controls.Add(this.btn7);
+            this.panel2.Controls.Add(this.btnSubtract);
+            this.panel2.Controls.Add(this.btn6);
+            this.panel2.Controls.Add(this.btn5);
+            this.panel2.Controls.Add(this.btn4);
+            this.panel2.Controls.Add(this.btnClear);
+            this.panel2.Controls.Add(this.btn3);
+            this.panel2.Controls.Add(this.btn2);
+            this.panel2.Controls.Add(this.btn1);
+            this.panel2.Controls.Add(this.lblDisplay);
+            this.panel2.Location = new System.Drawing.Point(357, 35);
+            this.panel2.Name = "panel2";
+            this.panel2.Size = new System.Drawing.Size(200, 184);
+            this.panel2.TabIndex = 17;
+            // 
+            // lblDisplay
+            // 
+            this.lblDisplay.Location = new System.Drawing.Point(3, 2);
+            this.lblDisplay.Multiline = true;
+            this.lblDisplay.Name = "lblDisplay";
+            this.lblDisplay.Size = new System.Drawing.Size(190, 39);
+            this.lblDisplay.TabIndex = 0;
+            this.lblDisplay.Text = "0";
+            // 
+            // btn1
+            // 
+            this.btn1.Location = new System.Drawing.Point(3, 47);
+            this.btn1.Name = "btn1";
+            this.btn1.Size = new System.Drawing.Size(45, 23);
+            this.btn1.TabIndex = 16;
+            this.btn1.Text = "1";
+            this.btn1.UseVisualStyleBackColor = true;
+            this.btn1.Click += new System.EventHandler(this.btn1_Click);
+            // 
+            // btn2
+            // 
+            this.btn2.Location = new System.Drawing.Point(50, 47);
+            this.btn2.Name = "btn2";
+            this.btn2.Size = new System.Drawing.Size(45, 23);
+            this.btn2.TabIndex = 17;
+            this.btn2.Text = "2";
+            this.btn2.UseVisualStyleBackColor = true;
+            this.btn2.Click += new System.EventHandler(this.btn2_Click);
+            // 
+            // btn3
+            // 
+            this.btn3.Location = new System.Drawing.Point(98, 47);
+            this.btn3.Name = "btn3";
+            this.btn3.Size = new System.Drawing.Size(45, 23);
+            this.btn3.TabIndex = 18;
+            this.btn3.Text = "3";
+            this.btn3.UseVisualStyleBackColor = true;
+            this.btn3.Click += new System.EventHandler(this.btn3_Click);
+            // 
+            // btnClear
+            // 
+            this.btnClear.Location = new System.Drawing.Point(146, 47);
+            this.btnClear.Name = "btnClear";
+            this.btnClear.Size = new System.Drawing.Size(45, 23);
+            this.btnClear.TabIndex = 19;
+            this.btnClear.Text = "C";
+            this.btnClear.UseVisualStyleBackColor = true;
+            this.btnClear.Click += new System.EventHandler(this.btnClear_Click);
+            // 
+            // btnSubtract
+            // 
+            this.btnSubtract.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
+            this.btnSubtract.Location = new System.Drawing.Point(146, 73);
+            this.btnSubtract.Name = "btnSubtract";
+            this.btnSubtract.Size = new System.Drawing.Size(45, 23);
+            this.btnSubtract.TabIndex = 23;
+            this.btnSubtract.Text = "-";
+            this.btnSubtract.UseVisualStyleBackColor = true;
+            this.btnSubtract.Click += new System.EventHandler(this.btnSubtract_Click);
+            // 
+            // btn6
+            // 
+            this.btn6.Location = new System.Drawing.Point(98, 73);
+            this.btn6.Name = "btn6";
+            this.btn6.Size = new System.Drawing.Size(45, 23);
+            this.btn6.TabIndex = 22;
+            this.btn6.Text = "6";
+            this.btn6.UseVisualStyleBackColor = true;
+            this.btn6.Click += new System.EventHandler(this.btn6_Click);
+            // 
+            // btn5
+            // 
+            this.btn5.Location = new System.Drawing.Point(50, 73);
+            this.btn5.Name = "btn5";
+            this.btn5.Size = new System.Drawing.Size(45, 23);
+            this.btn5.TabIndex = 21;
+            this.btn5.Text = "5";
+            this.btn5.UseVisualStyleBackColor = true;
+            this.btn5.Click += new System.EventHandler(this.btn5_Click);
+            // 
+            // btn4
+            // 
+            this.btn4.Location = new System.Drawing.Point(3, 73);
+            this.btn4.Name = "btn4";
+            this.btn4.Size = new System.Drawing.Size(45, 23);
+            this.btn4.TabIndex = 20;
+            this.btn4.Text = "4";
+            this.btn4.UseVisualStyleBackColor = true;
+            this.btn4.Click += new System.EventHandler(this.btn4_Click);
+            // 
+            // btnAdd
+            // 
+            this.btnAdd.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
+            this.btnAdd.Location = new System.Drawing.Point(147, 99);
+            this.btnAdd.Name = "btnAdd";
+            this.btnAdd.Size = new System.Drawing.Size(45, 23);
+            this.btnAdd.TabIndex = 27;
+            this.btnAdd.Text = "+";
+            this.btnAdd.UseVisualStyleBackColor = true;
+            this.btnAdd.Click += new System.EventHandler(this.btnAdd_Click);
+            // 
+            // btn9
+            // 
+            this.btn9.Location = new System.Drawing.Point(99, 99);
+            this.btn9.Name = "btn9";
+            this.btn9.Size = new System.Drawing.Size(45, 23);
+            this.btn9.TabIndex = 26;
+            this.btn9.Text = "9";
+            this.btn9.UseVisualStyleBackColor = true;
+            this.btn9.Click += new System.EventHandler(this.btn9_Click);
+            // 
+            // btn8
+            // 
+            this.btn8.Location = new System.Drawing.Point(51, 99);
+            this.btn8.Name = "btn8";
+            this.btn8.Size = new System.Drawing.Size(45, 23);
+            this.btn8.TabIndex = 25;
+            this.btn8.Text = "8";
+            this.btn8.UseVisualStyleBackColor = true;
+            this.btn8.Click += new System.EventHandler(this.btn8_Click);
+            // 
+            // btn7
+            // 
+            this.btn7.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.btn7.Location = new System.Drawing.Point(4, 99);
+            this.btn7.Name = "btn7";
+            this.btn7.Size = new System.Drawing.Size(45, 23);
+            this.btn7.TabIndex = 24;
+            this.btn7.Text = "7";
+            this.btn7.UseVisualStyleBackColor = true;
+            this.btn7.Click += new System.EventHandler(this.btn7_Click);
+            // 
+            // btnDivide
+            // 
+            this.btnDivide.Location = new System.Drawing.Point(99, 124);
+            this.btnDivide.Name = "btnDivide";
+            this.btnDivide.Size = new System.Drawing.Size(45, 23);
+            this.btnDivide.TabIndex = 30;
+            this.btnDivide.Text = "/";
+            this.btnDivide.UseVisualStyleBackColor = true;
+            this.btnDivide.Click += new System.EventHandler(this.btnDivide_Click);
+            // 
+            // btn0
+            // 
+            this.btn0.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.btn0.Location = new System.Drawing.Point(51, 124);
+            this.btn0.Name = "btn0";
+            this.btn0.Size = new System.Drawing.Size(45, 23);
+            this.btn0.TabIndex = 29;
+            this.btn0.Text = "0";
+            this.btn0.UseVisualStyleBackColor = true;
+            this.btn0.Click += new System.EventHandler(this.btn0_Click);
+            // 
+            // btnDot
+            // 
+            this.btnDot.Font = new System.Drawing.Font("Microsoft Sans Serif", 12.25F);
+            this.btnDot.Location = new System.Drawing.Point(4, 124);
+            this.btnDot.Name = "btnDot";
+            this.btnDot.Size = new System.Drawing.Size(45, 23);
+            this.btnDot.TabIndex = 28;
+            this.btnDot.Text = ".";
+            this.btnDot.UseVisualStyleBackColor = true;
+            this.btnDot.Click += new System.EventHandler(this.btnDot_Click);
+            // 
+            // btnMultiply
+            // 
+            this.btnMultiply.Location = new System.Drawing.Point(146, 124);
+            this.btnMultiply.Name = "btnMultiply";
+            this.btnMultiply.Size = new System.Drawing.Size(45, 23);
+            this.btnMultiply.TabIndex = 31;
+            this.btnMultiply.Text = "x";
+            this.btnMultiply.UseVisualStyleBackColor = true;
+            this.btnMultiply.Click += new System.EventHandler(this.btnMultiply_Click);
+            // 
+            // btnEquals
+            // 
+            this.btnEquals.Font = new System.Drawing.Font("Microsoft Sans Serif", 8.25F);
+            this.btnEquals.Location = new System.Drawing.Point(4, 149);
+            this.btnEquals.Name = "btnEquals";
+            this.btnEquals.Size = new System.Drawing.Size(187, 27);
+            this.btnEquals.TabIndex = 32;
+            this.btnEquals.Text = "=";
+            this.btnEquals.UseVisualStyleBackColor = true;
+            this.btnEquals.Click += new System.EventHandler(this.btnEquals_Click);
+            // 
             // UniformSales
             // 
             this.AutoScaleDimensions = new System.Drawing.SizeF(6F, 13F);
             this.AutoScaleMode = System.Windows.Forms.AutoScaleMode.Font;
             this.ClientSize = new System.Drawing.Size(968, 580);
+            this.Controls.Add(this.panel2);
             this.Controls.Add(this.btnBack);
             this.Controls.Add(this.rtbReceipt);
             this.Controls.Add(this.groupBox1);
@@ -358,6 +578,8 @@
             ((System.ComponentModel.ISupportInitialize)(this.numQty)).EndInit();
             this.groupBox1.ResumeLayout(false);
             ((System.ComponentModel.ISupportInitialize)(this.dgvCart)).EndInit();
+            this.panel2.ResumeLayout(false);
+            this.panel2.PerformLayout();
             this.ResumeLayout(false);
 
         }
@@ -382,7 +604,6 @@
         private System.Windows.Forms.Button btnCompleteSale;
         private System.Windows.Forms.Button btnDeleteItem;
         private System.Windows.Forms.Button btnPrint;
-        private System.Windows.Forms.Button btnShowReceipt;
         private System.Windows.Forms.RichTextBox rtbReceipt;
         private System.Windows.Forms.Button btnBack;
         private System.Windows.Forms.Label label5;
@@ -395,5 +616,24 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn FirstName;
         private System.Windows.Forms.DataGridViewTextBoxColumn Studentname;
         private System.Windows.Forms.DataGridViewTextBoxColumn Class;
+        private System.Windows.Forms.Panel panel2;
+        private System.Windows.Forms.Button btnSubtract;
+        private System.Windows.Forms.Button btn6;
+        private System.Windows.Forms.Button btn5;
+        private System.Windows.Forms.Button btn4;
+        private System.Windows.Forms.Button btnClear;
+        private System.Windows.Forms.Button btn3;
+        private System.Windows.Forms.Button btn2;
+        private System.Windows.Forms.Button btn1;
+        private System.Windows.Forms.TextBox lblDisplay;
+        private System.Windows.Forms.Button btnEquals;
+        private System.Windows.Forms.Button btnMultiply;
+        private System.Windows.Forms.Button btnDivide;
+        private System.Windows.Forms.Button btn0;
+        private System.Windows.Forms.Button btnDot;
+        private System.Windows.Forms.Button btnAdd;
+        private System.Windows.Forms.Button btn9;
+        private System.Windows.Forms.Button btn8;
+        private System.Windows.Forms.Button btn7;
     }
 }
