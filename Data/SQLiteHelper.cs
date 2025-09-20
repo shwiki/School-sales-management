@@ -138,7 +138,18 @@ namespace Gusheshe.Data
                     Price    REAL,
                     Quantity INTEGER
                 );
-
+                 -- Users table for authentication
+                CREATE TABLE IF NOT EXISTS Users (
+                    UserID INTEGER PRIMARY KEY AUTOINCREMENT,
+                    Username TEXT NOT NULL UNIQUE,
+                    PasswordHash TEXT NOT NULL,
+                    Email TEXT,
+                    FirstName TEXT,
+                    LastName TEXT,
+                    IsActive INTEGER DEFAULT 1,
+                    CreatedDate TEXT DEFAULT CURRENT_TIMESTAMP,
+                    LastLoginDate TEXT NULL
+                );
                 -- Uniform Sales (existing)
                 CREATE TABLE IF NOT EXISTS UniformSales (
                     SaleId      INTEGER PRIMARY KEY AUTOINCREMENT,
@@ -162,8 +173,10 @@ namespace Gusheshe.Data
                     Description TEXT,
                     FOREIGN KEY (StudentId) REFERENCES Students (StudentId)
                 );
-
+                
                 -- Create indexes for better performance
+                CREATE INDEX IF NOT EXISTS IX_Users_Username ON Users(Username);
+                CREATE INDEX IF NOT EXISTS IX_Users_Email ON Users(Email);
                 CREATE INDEX IF NOT EXISTS idx_student_term_fees ON StudentTermFees(StudentId, TermId);
                 CREATE INDEX IF NOT EXISTS idx_term_fee_accounts ON TermFeeAccounts(StudentId, TermId);
                 CREATE INDEX IF NOT EXISTS idx_fee_payments_term ON FeePayments(TermId, DatePaid);

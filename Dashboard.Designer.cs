@@ -79,6 +79,7 @@
             this.syncbtn.TabIndex = 2;
             this.syncbtn.Text = "Sync Online";
             this.syncbtn.UseVisualStyleBackColor = true;
+            this.syncbtn.Click += new System.EventHandler(this.syncbtn_Click);
             // 
             // button1
             // 
@@ -126,6 +127,7 @@
             this.Controls.Add(this.uniformbtn);
             this.Name = "Dashboard";
             this.Text = "Dashboard";
+            this.Load += new System.EventHandler(this.Dashboard_Load);
             this.ResumeLayout(false);
 
         }

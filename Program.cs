@@ -17,7 +17,7 @@ namespace Gusheshe
             Application.EnableVisualStyles();
             Gusheshe.Data.SQLiteHelper.InitializeDatabase();
             Application.SetCompatibleTextRenderingDefault(false);
-            Application.Run(new Dashboard());
+            Application.Run(new Login());
         }
     }
 }

@@ -66,5 +66,15 @@ namespace Gusheshe
             stockManagement.FormClosed += (s, args) => this.Show(); // Re-show dashboard when UniformSalesForm is closed
             stockManagement.Show();
         }
+
+        private void syncbtn_Click(object sender, EventArgs e)
+        {
+
+        }
+
+        private void Dashboard_Load(object sender, EventArgs e)
+        {
+
+        }
     }
 }

@@ -68,9 +68,9 @@
             this.PaymentId = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.StudentsID = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.Name = new System.Windows.Forms.DataGridViewTextBoxColumn();
+            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.AmountPaid = new System.Windows.Forms.DataGridViewTextBoxColumn();
             this.DatePaid = new System.Windows.Forms.DataGridViewTextBoxColumn();
-            this.Description = new System.Windows.Forms.DataGridViewTextBoxColumn();
             ((System.ComponentModel.ISupportInitialize)(this.nudPaymentAmount)).BeginInit();
             this.groupBox1.SuspendLayout();
             ((System.ComponentModel.ISupportInitialize)(this.dgvFeeAccounts)).BeginInit();
@@ -379,9 +379,9 @@
             this.PaymentId,
             this.StudentsID,
             this.Name,
+            this.Description,
             this.AmountPaid,
-            this.DatePaid,
-            this.Description});
+            this.DatePaid});
             this.dgvPaymentHistory.Location = new System.Drawing.Point(6, 19);
             this.dgvPaymentHistory.Name = "dgvPaymentHistory";
             this.dgvPaymentHistory.Size = new System.Drawing.Size(459, 338);
@@ -404,6 +404,11 @@
             this.Name.HeaderText = "Student Name";
             this.Name.Name = "Name";
             // 
+            // Description
+            // 
+            this.Description.HeaderText = "Description";
+            this.Description.Name = "Description";
+            // 
             // AmountPaid
             // 
             this.AmountPaid.HeaderText = "Amount Paid";
@@ -413,11 +418,6 @@
             // 
             this.DatePaid.HeaderText = "Date Paid";
             this.DatePaid.Name = "DatePaid";
-            // 
-            // Description
-            // 
-            this.Description.HeaderText = "Description";
-            this.Description.Name = "Description";
             // 
             // FeesPayment
             // 
@@ -502,8 +502,8 @@
         private System.Windows.Forms.DataGridViewTextBoxColumn PaymentId;
         private System.Windows.Forms.DataGridViewTextBoxColumn StudentsID;
         private System.Windows.Forms.DataGridViewTextBoxColumn Name;
+        private System.Windows.Forms.DataGridViewTextBoxColumn Description;
         private System.Windows.Forms.DataGridViewTextBoxColumn AmountPaid;
         private System.Windows.Forms.DataGridViewTextBoxColumn DatePaid;
-        private System.Windows.Forms.DataGridViewTextBoxColumn Description;
     }
 }

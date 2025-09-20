@@ -22,18 +22,20 @@ namespace Gusheshe
         private string operation = "";
         private bool operationPressed = false;
         private bool equalsPressed = false;
-        // DataTables for each SQL table
-        private string lastReceiptText;  // store from ShowReceipt
-        private DataTable dtItems = new DataTable();     // UniformItems
-        private DataTable dtStudents = new DataTable();     // Students
-        private DataTable dtSales = new DataTable();     // UniformSales
 
-        // DataAdapters to fill + update
+        // Receipt and stock management
+        private string lastReceiptText;
+        private DataTable dtItems = new DataTable();
+        private DataTable dtStudents = new DataTable();
+        private DataTable dtSales = new DataTable();
+
+        // Memory value for calculator
+        private double memoryValue = 0;
+
+        // DataAdapters and BindingSources
         private SQLiteDataAdapter daItems;
         private SQLiteDataAdapter daStudents;
         private SQLiteDataAdapter daSales;
-
-        // BindingSources to simplify data-binding
         private BindingSource bsItems = new BindingSource();
         private BindingSource bsStudents = new BindingSource();
         private BindingSource bsSales = new BindingSource();
@@ -46,24 +48,31 @@ namespace Gusheshe
 
         private void UniformSales_Load(object sender, EventArgs e)
         {
-            // 1) ITEMS
-            DataTable dtItems = new DataTable();
+            LoadItemsWithStockCheck();
+            LoadStudents();
+            InitializeControls();
+            CheckLowStockItems();
+        }
+        private void LoadItemsWithStockCheck()
+        {
+            dtItems = new DataTable();
             using (SQLiteConnection conn = SQLiteHelper.GetConnection())
             using (SQLiteDataAdapter daItems = new SQLiteDataAdapter(
-                   "SELECT ItemName, Price FROM UniformItems", conn))
+                   "SELECT ItemName, Price, Quantity FROM UniformItems ORDER BY ItemName", conn))
             {
                 daItems.Fill(dtItems);
             }
 
             cbItemName.DataSource = dtItems;
             cbItemName.DisplayMember = "ItemName";
-            cbItemName.ValueMember = "Price";      // so SelectedValue is the unit-price
-
-            // 2) STUDENTS
+            cbItemName.ValueMember = "Price";
+        }
+        private void LoadStudents()
+        {
             DataTable dtStudents = new DataTable();
             using (SQLiteConnection conn = SQLiteHelper.GetConnection())
             using (SQLiteDataAdapter daStudents = new SQLiteDataAdapter(
-                   "SELECT FirstName, LastName, Class FROM Students", conn))
+                   "SELECT DISTINCT FirstName, LastName, Class FROM Students ORDER BY FirstName", conn))
             {
                 daStudents.Fill(dtStudents);
             }
@@ -79,8 +88,10 @@ namespace Gusheshe
             cbClass.DataSource = dtStudents;
             cbClass.DisplayMember = "Class";
             cbClass.ValueMember = "Class";
+        }
 
-            // initialize controls
+        private void InitializeControls()
+        {
             numQty.Minimum = 1;
             numQty.Value = 1;
             txtUnitPrice.Text = "0.00";
@@ -90,13 +101,130 @@ namespace Gusheshe
             numQty.ValueChanged += (s, e2) => RecalcTotal();
             cbLastName.SelectedIndexChanged += cbStudentName_SelectedIndexChanged;
             cbFirstName.SelectedIndexChanged += cbStudentName_SelectedIndexChanged;
+        
         }
+        private void CheckLowStockItems()
+        {
+            try
+            {
+                var lowStockItems = new List<string>();
+                var outOfStockItems = new List<string>();
+
+                using (SQLiteConnection conn = SQLiteHelper.GetConnection())
+                using (SQLiteCommand cmd = new SQLiteCommand("SELECT ItemName, Quantity FROM UniformItems", conn))
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string itemName = reader["ItemName"].ToString();
+                        int quantity = Convert.ToInt32(reader["Quantity"]);
+
+                        if (quantity == 0)
+                        {
+                            outOfStockItems.Add(itemName);
+                        }
+                        else if (quantity <= 5) // Low stock threshold
+                        {
+                            lowStockItems.Add($"{itemName} ({quantity} left)");
+                        }
+                    }
+                }
+
+                // Show alerts for stock issues
+                if (outOfStockItems.Count > 0)
+                {
+                    MessageBox.Show(
+                        $"OUT OF STOCK ITEMS:\n\n{string.Join("\n", outOfStockItems)}\n\n" +
+                        "These items cannot be sold until restocked.",
+                        "Stock Alert - Out of Stock",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Warning);
+                }
+
+                if (lowStockItems.Count > 0)
+                {
+                    MessageBox.Show(
+                        $"LOW STOCK ALERT:\n\n{string.Join("\n", lowStockItems)}\n\n" +
+                        "Consider restocking these items soon.",
+                        "Stock Alert - Low Stock",
+                        MessageBoxButtons.OK,
+                        MessageBoxIcon.Information);
+                }
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error checking stock levels: {ex.Message}", "Stock Check Error",
+                    MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+       
         private void cbItemName_SelectedIndexChanged(object sender, EventArgs e)
         {
-            // the combo's ValueMember is "Price"
-            decimal price;
-            Decimal.TryParse(cbItemName.SelectedValue.ToString(), out price);
+            if (cbItemName.SelectedItem == null) return;
+
+            DataRowView selectedRow = (DataRowView)cbItemName.SelectedItem;
+            decimal price = Convert.ToDecimal(selectedRow["Price"]);
+            int availableStock = Convert.ToInt32(selectedRow["Quantity"]);
+
             txtUnitPrice.Text = price.ToString("F2");
+
+            // Update quantity controls based on available stock
+            if (availableStock == 0)
+            {
+                numQty.Enabled = false;
+
+                try
+                {
+                    // Ensure Minimum allows 0 before assigning
+                    if (numQty.Minimum > 0)
+                        numQty.Minimum = 0;
+
+                    numQty.Value = 0;
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    // Fallback: set Value safely within allowed range
+                    numQty.Value = numQty.Minimum;
+
+                    // Optional: log or show message (during debugging)
+                    Console.WriteLine($"Error setting numQty.Value: {ex.Message}");
+                }
+
+                statusLabel.Text = $"⚠️ {cbItemName.Text} is OUT OF STOCK!";
+                statusLabel.ForeColor = Color.Red;
+            }
+            else
+            {
+                numQty.Enabled = true;
+
+                // Make sure Minimum is valid before setting Value
+                numQty.Minimum = 1;
+                numQty.Maximum = availableStock;
+
+                try
+                {
+                    numQty.Value = Math.Min(1, availableStock);
+                }
+                catch (ArgumentOutOfRangeException ex)
+                {
+                    numQty.Value = numQty.Minimum;
+                    Console.WriteLine($"Error setting numQty.Value: {ex.Message}");
+                }
+
+                if (availableStock <= 5)
+                {
+                    statusLabel.Text = $"⚠️ Low stock: {availableStock} {cbItemName.Text} remaining";
+                    statusLabel.ForeColor = Color.Orange;
+                }
+                else
+                {
+                    statusLabel.Text = $"{availableStock} {cbItemName.Text} available";
+                    statusLabel.ForeColor = Color.Green;
+                }
+            }
+
+
             RecalcTotal();
         }
         private void RecalcTotal()
@@ -109,43 +237,87 @@ namespace Gusheshe
 
         private void btnAddtoCart_Click(object sender, EventArgs e)
         {
-            // 1. Validate
-            if (cbItemName.SelectedItem == null ||
-                cbLastName.SelectedItem == null)
+            // Validation
+            if (cbItemName.SelectedItem == null || cbLastName.SelectedItem == null)
             {
-                MessageBox.Show(
-                  "Please select both an item and a student.",
-                  "Missing Data",
-                  MessageBoxButtons.OK,
-                  MessageBoxIcon.Warning);
+                MessageBox.Show("Please select both an item and a student.", "Missing Data",
+                    MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // 2. Grab values
+            // Check stock availability
+            DataRowView selectedRow = (DataRowView)cbItemName.SelectedItem;
+            int availableStock = Convert.ToInt32(selectedRow["Quantity"]);
+            int requestedQty = (int)numQty.Value;
+
+            if (availableStock < requestedQty)
+            {
+                MessageBox.Show($"Not enough stock! Only {availableStock} units available.",
+                    "Insufficient Stock", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Check if adding this quantity would exceed current cart items for this product
+            int currentCartQty = GetCurrentCartQuantity(cbItemName.Text);
+            if (availableStock < (currentCartQty + requestedQty))
+            {
+                MessageBox.Show($"Cannot add {requestedQty} more units. " +
+                    $"You already have {currentCartQty} in cart. " +
+                    $"Only {availableStock - currentCartQty} more available.",
+                    "Stock Limit Exceeded", MessageBoxButtons.OK, MessageBoxIcon.Warning);
+                return;
+            }
+
+            // Add to cart
             string item = cbItemName.Text;
-            decimal price = 0m;
-            decimal.TryParse(txtUnitPrice.Text, out price);
-            int qty = (int)numQty.Value;
+            decimal price = Convert.ToDecimal(txtUnitPrice.Text);
+            int qty = requestedQty;
             decimal total = price * qty;
             string firstName = cbFirstName.Text;
             string lastName = cbLastName.Text;
-            string @class = cbClass.Text;
+            string studentClass = cbClass.Text;
 
-            // 3. Add to grid
-            dgvCart.Rows.Add(
-              item,
-              qty,
-              price.ToString("F2"),
-              total.ToString("F2"),
-              firstName,
-              lastName,
-              @class);
+            dgvCart.Rows.Add(item, qty, price.ToString("F2"), total.ToString("F2"),
+                firstName, lastName, studentClass);
 
-            // 4. Feedback
-            statusLabel.Text = $"{qty}× {item} added for {firstName} {lastName}.";
+            // Update receipt display
+            UpdateReceiptDisplay();
 
+            statusLabel.Text = $"✓ {qty}× {item} added for {firstName} {lastName}";
+            statusLabel.ForeColor = Color.Green;
         }
 
+        private int GetCurrentCartQuantity(string itemName)
+        {
+            int totalQty = 0;
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (row.Cells[0].Value?.ToString() == itemName)
+                {
+                    totalQty += Convert.ToInt32(row.Cells[1].Value);
+                }
+            }
+            return totalQty;
+        }
+        private void UpdateReceiptDisplay()
+        {
+            if (dgvCart.Rows.Count == 0)
+            {
+                ClearReceiptDisplay();
+                return;
+            }
+
+            GenerateReceiptForRichTextBox();
+        }
+        private void ClearReceiptDisplay()
+        {
+            if (this.Controls.Find("richTextBoxReceipt", true).FirstOrDefault() is RichTextBox rtb)
+            {
+                rtb.Clear();
+            }
+            lastReceiptText = "";
+        }
         private void cbStudentName_SelectedIndexChanged(object sender, EventArgs e)
         {
 
@@ -155,11 +327,8 @@ namespace Gusheshe
         {
             if (dgvCart.SelectedRows.Count == 0)
             {
-                MessageBox.Show(
-                  "Select a row in the cart first.",
-                  "Nothing Selected",
-                  MessageBoxButtons.OK,
-                  MessageBoxIcon.Information);
+                MessageBox.Show("Select a row in the cart first.", "Nothing Selected",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
@@ -167,15 +336,15 @@ namespace Gusheshe
             string studentName = $"{dgvCart.SelectedRows[0].Cells[4].Value} {dgvCart.SelectedRows[0].Cells[5].Value}";
 
             var result = MessageBox.Show(
-                $"Are you sure you want to remove '{itemName}' for '{studentName}' from the cart?",
-                "Confirm Removal",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                $"Remove '{itemName}' for '{studentName}' from cart?",
+                "Confirm Removal", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
             if (result == DialogResult.Yes)
             {
                 dgvCart.Rows.RemoveAt(dgvCart.SelectedRows[0].Index);
+                UpdateReceiptDisplay();
                 statusLabel.Text = "Item removed from cart.";
+                statusLabel.ForeColor = Color.Blue;
             }
         }
 
@@ -183,24 +352,79 @@ namespace Gusheshe
         {
             if (dgvCart.Rows.Count == 0)
             {
-                MessageBox.Show(
-                  "Your cart is empty. Please add items to cart first.",
-                  "Cart Empty",
-                  MessageBoxButtons.OK,
-                  MessageBoxIcon.Information);
+                MessageBox.Show("Your cart is empty. Please add items to cart first.",
+                    "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Information);
                 return;
             }
 
-            // Generate receipt and display in RichTextBox
+            // Check stock availability before completing sale
+            if (!ValidateStockBeforeSale())
+            {
+                return;
+            }
+
             GenerateReceiptForRichTextBox();
 
-            // Show success message
             MessageBox.Show(
-                "Receipt has been generated and displayed in the receipt area.\n\n" +
-                "To finalize the sale, please click the 'Print Receipt' button.",
-                "Receipt Generated",
-                MessageBoxButtons.OK,
-                MessageBoxIcon.Information);
+                "Receipt generated! Review the receipt in the display area.\n\n" +
+                "Click 'Print Receipt' to finalize the sale and update inventory.",
+                "Receipt Ready", MessageBoxButtons.OK, MessageBoxIcon.Information);
+        }
+
+        private bool ValidateStockBeforeSale()
+        {
+            var stockIssues = new List<string>();
+
+            // Group cart items by product
+            var cartItems = new Dictionary<string, int>();
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (row.IsNewRow) continue;
+                string itemName = row.Cells[0].Value.ToString();
+                int quantity = Convert.ToInt32(row.Cells[1].Value);
+
+                if (cartItems.ContainsKey(itemName))
+                    cartItems[itemName] += quantity;
+                else
+                    cartItems[itemName] = quantity;
+            }
+
+            // Check current stock for each item
+            using (SQLiteConnection conn = SQLiteHelper.GetConnection())
+            {
+                foreach (var item in cartItems)
+                {
+                    using (SQLiteCommand cmd = new SQLiteCommand(
+                        "SELECT Quantity FROM UniformItems WHERE ItemName = @itemName", conn))
+                    {
+                        cmd.Parameters.AddWithValue("@itemName", item.Key);
+                        var result = cmd.ExecuteScalar();
+
+                        if (result == null)
+                        {
+                            stockIssues.Add($"{item.Key}: Item not found in inventory");
+                            continue;
+                        }
+
+                        int availableStock = Convert.ToInt32(result);
+                        if (availableStock < item.Value)
+                        {
+                            stockIssues.Add($"{item.Key}: Need {item.Value}, only {availableStock} available");
+                        }
+                    }
+                }
+            }
+
+            if (stockIssues.Count > 0)
+            {
+                MessageBox.Show(
+                    "STOCK ISSUES FOUND:\n\n" + string.Join("\n", stockIssues) + "\n\n" +
+                    "Please adjust quantities or remove items before completing the sale.",
+                    "Stock Validation Failed", MessageBoxButtons.OK, MessageBoxIcon.Error);
+                return false;
+            }
+
+            return true;
         }
 
         private void GenerateReceiptForRichTextBox()
@@ -222,10 +446,13 @@ namespace Gusheshe
             sb.AppendLine("───────────────────────────────────────");
 
             decimal grandTotal = 0;
+            int itemCount = 0;
+
             foreach (DataGridViewRow row in dgvCart.Rows)
             {
                 if (row.IsNewRow) continue;
 
+                itemCount++;
                 string itemName = row.Cells[0].Value?.ToString();
                 string quantity = row.Cells[1].Value?.ToString();
                 string unitPrice = row.Cells[2].Value?.ToString();
@@ -234,9 +461,9 @@ namespace Gusheshe
                 string lastName = row.Cells[5].Value?.ToString();
                 string studentClass = row.Cells[6].Value?.ToString();
 
-                sb.AppendLine($"Item: {itemName}");
-                sb.AppendLine($"Student: {firstName} {lastName} - {studentClass}");
-                sb.AppendLine($"Quantity: {quantity} × ${unitPrice} = ${total}");
+                sb.AppendLine($"{itemCount}. {itemName}");
+                sb.AppendLine($"   Student: {firstName} {lastName} - {studentClass}");
+                sb.AppendLine($"   Qty: {quantity} × ${unitPrice} = ${total}");
                 sb.AppendLine();
 
                 if (decimal.TryParse(total, out decimal itemTotal))
@@ -247,6 +474,7 @@ namespace Gusheshe
 
             // Total section
             sb.AppendLine("───────────────────────────────────────");
+            sb.AppendLine($"TOTAL ITEMS: {itemCount}");
             sb.AppendLine($"GRAND TOTAL: ${grandTotal:F2}");
             sb.AppendLine();
             sb.AppendLine("═══════════════════════════════════════");
@@ -254,14 +482,15 @@ namespace Gusheshe
             sb.AppendLine("Keep this receipt for your records.");
             sb.AppendLine("═══════════════════════════════════════");
 
-            // Store for printing and display in RichTextBox
             lastReceiptText = sb.ToString();
 
-            // Display in RichTextBox (assuming you have richTextBoxReceipt)
+            // Display in RichTextBox
             if (this.Controls.Find("richTextBoxReceipt", true).FirstOrDefault() is RichTextBox rtb)
             {
                 rtb.Text = lastReceiptText;
-                rtb.Font = new Font("Courier New", 10, FontStyle.Regular);
+                rtb.Font = new Font("Courier New", 9, FontStyle.Regular);
+                rtb.SelectionStart = 0;
+                rtb.ScrollToCaret();
             }
         }
 
@@ -275,98 +504,162 @@ namespace Gusheshe
             }
 
             GenerateReceiptForRichTextBox();
-
-            // Show preview in MessageBox as well
-            MessageBox.Show(
-              lastReceiptText,
-              "Receipt Preview",
-              MessageBoxButtons.OK,
-              MessageBoxIcon.Information);
         }
 
         private void btnPrint_Click(object sender, EventArgs e)
         {
-            // Validation before saving
             if (dgvCart.Rows.Count == 0)
             {
-                MessageBox.Show(
-                    "Cart is empty. Please add items to cart before printing.",
-                    "Cart Empty",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Warning);
+                MessageBox.Show("Cart is empty. Please add items to cart before printing.",
+                    "Cart Empty", MessageBoxButtons.OK, MessageBoxIcon.Warning);
                 return;
             }
 
-            // Generate receipt if not already done
+            // Final stock validation
+            if (!ValidateStockBeforeSale())
+            {
+                return;
+            }
+
             if (string.IsNullOrEmpty(lastReceiptText))
             {
                 GenerateReceiptForRichTextBox();
             }
 
-            // Calculate total for verification
             decimal cartTotal = CalculateCartTotal();
             int totalItems = CountCartItems();
 
-            // Pre-save verification dialog
             var verifyResult = MessageBox.Show(
-                $"VERIFY SALE DETAILS:\n\n" +
+                $"FINALIZE SALE:\n\n" +
                 $"Total Items: {totalItems}\n" +
                 $"Total Amount: ${cartTotal:F2}\n" +
                 $"Date: {DateTime.Now:yyyy-MM-dd HH:mm:ss}\n\n" +
                 "This will:\n" +
-                "• Save all items to the database\n" +
-                "• Print the receipt\n" +
-                "• Clear the cart\n\n" +
-                "Do you want to proceed with this sale?",
-                "Confirm Sale & Print",
-                MessageBoxButtons.YesNo,
-                MessageBoxIcon.Question);
+                "• Save sale to database\n" +
+                "• Update inventory quantities\n" +
+                "• Print receipt\n" +
+                "• Clear cart\n\n" +
+                "Proceed with sale?",
+                "Confirm Sale", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
 
-            if (verifyResult != DialogResult.Yes)
-            {
-                return;
-            }
+            if (verifyResult != DialogResult.Yes) return;
 
             try
             {
-                // Save to database
-                SaveSaleToDatabase();
-
-                // Print the receipt
+                SaveSaleAndUpdateStock();
                 PrintReceipt();
 
-                // Success notification
                 MessageBox.Show(
                     $"Sale completed successfully!\n\n" +
-                    $"• {totalItems} items saved to database\n" +
+                    $"• {totalItems} items sold\n" +
+                    $"• Inventory updated\n" +
                     $"• Receipt printed\n" +
                     $"• Total: ${cartTotal:F2}",
-                    "Sale Complete",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Information);
+                    "Sale Complete", MessageBoxButtons.OK, MessageBoxIcon.Information);
 
-                // Clear cart after successful save and print
+                // Clear everything
                 dgvCart.Rows.Clear();
-                lastReceiptText = "";
+                ClearReceiptDisplay();
 
-                // Clear RichTextBox
-                if (this.Controls.Find("richTextBoxReceipt", true).FirstOrDefault() is RichTextBox rtb)
-                {
-                    rtb.Clear();
-                }
+                // Reload items to reflect updated stock
+                LoadItemsWithStockCheck();
 
-                statusLabel.Text = "Sale completed and cart cleared.";
+                statusLabel.Text = "Sale completed successfully!";
+                statusLabel.ForeColor = Color.Green;
             }
             catch (Exception ex)
             {
-                MessageBox.Show(
-                    $"Error processing sale:\n\n{ex.Message}\n\n" +
-                    "The sale was not completed. Please try again.",
-                    "Sale Error",
-                    MessageBoxButtons.OK,
-                    MessageBoxIcon.Error);
+                MessageBox.Show($"Error processing sale:\n\n{ex.Message}",
+                    "Sale Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
             }
         }
+        private void SaveSaleAndUpdateStock()
+        {
+            using (var conn = SQLiteHelper.GetConnection())
+            using (var tran = conn.BeginTransaction())
+            {
+                try
+                {
+                    // Save sales records
+                    using (var salesCmd = new SQLiteCommand(conn))
+                    {
+                        salesCmd.CommandText = @"
+                            INSERT INTO UniformSales (ItemName, Quantity, UnitPrice, Total, FirstName, LastName, Class, DateSold)
+                            VALUES (@i,@q,@u,@t,@f,@l,@c,@d)";
+
+                        foreach (DataGridViewRow row in dgvCart.Rows)
+                        {
+                            if (row.IsNewRow) continue;
+
+                            salesCmd.Parameters.Clear();
+                            salesCmd.Parameters.AddWithValue("@i", row.Cells[0].Value);
+                            salesCmd.Parameters.AddWithValue("@q", row.Cells[1].Value);
+                            salesCmd.Parameters.AddWithValue("@u", row.Cells[2].Value);
+                            salesCmd.Parameters.AddWithValue("@t", row.Cells[3].Value);
+                            salesCmd.Parameters.AddWithValue("@f", row.Cells[4].Value);
+                            salesCmd.Parameters.AddWithValue("@l", row.Cells[5].Value);
+                            salesCmd.Parameters.AddWithValue("@c", row.Cells[6].Value);
+                            salesCmd.Parameters.AddWithValue("@d", DateTime.Now.ToString("yyyy-MM-dd HH:mm:ss"));
+
+                            salesCmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    // Update inventory quantities
+                    using (var updateCmd = new SQLiteCommand(conn))
+                    {
+                        updateCmd.CommandText = @"
+                            UPDATE UniformItems 
+                            SET Quantity = Quantity - @soldQty 
+                            WHERE ItemName = @itemName";
+
+                        // Group items by name to handle multiple quantities
+                        var itemQuantities = new Dictionary<string, int>();
+                        foreach (DataGridViewRow row in dgvCart.Rows)
+                        {
+                            if (row.IsNewRow) continue;
+                            string itemName = row.Cells[0].Value.ToString();
+                            int quantity = Convert.ToInt32(row.Cells[1].Value);
+
+                            if (itemQuantities.ContainsKey(itemName))
+                                itemQuantities[itemName] += quantity;
+                            else
+                                itemQuantities[itemName] = quantity;
+                        }
+
+                        // Update each unique item
+                        foreach (var item in itemQuantities)
+                        {
+                            updateCmd.Parameters.Clear();
+                            updateCmd.Parameters.AddWithValue("@itemName", item.Key);
+                            updateCmd.Parameters.AddWithValue("@soldQty", item.Value);
+                            updateCmd.ExecuteNonQuery();
+                        }
+                    }
+
+                    tran.Commit();
+                }
+                catch
+                {
+                    tran.Rollback();
+                    throw;
+                }
+            }
+        }
+        private decimal CalculateCartTotal()
+        {
+            decimal total = 0;
+            foreach (DataGridViewRow row in dgvCart.Rows)
+            {
+                if (row.IsNewRow) continue;
+                if (decimal.TryParse(row.Cells[3].Value?.ToString(), out decimal itemTotal))
+                {
+                    total += itemTotal;
+                }
+            }
+            return total;
+        }
+
         private void SaveSaleToDatabase()
         {
             using (var conn = SQLiteHelper.GetConnection())
@@ -423,19 +716,6 @@ namespace Gusheshe
             }
         }
 
-        private decimal CalculateCartTotal()
-        {
-            decimal total = 0;
-            foreach (DataGridViewRow row in dgvCart.Rows)
-            {
-                if (row.IsNewRow) continue;
-                if (decimal.TryParse(row.Cells[3].Value?.ToString(), out decimal itemTotal))
-                {
-                    total += itemTotal;
-                }
-            }
-            return total;
-        }
         private int CountCartItems()
         {
             int count = 0;
@@ -741,12 +1021,68 @@ namespace Gusheshe
             }
         }
 
-        // Optional: Add memory functions
-        private double memoryValue = 0;
-
-        private void btnMemoryStore_Click(object sender, EventArgs e)
+        // Stock Management Helper Methods
+        private void RefreshStockDisplay()
         {
-            memoryValue = currentValue;
+            LoadItemsWithStockCheck();
+            if (cbItemName.SelectedItem != null)
+            {
+                cbItemName_SelectedIndexChanged(cbItemName, EventArgs.Empty);
+            }
         }
-    }
+        private void ShowStockReport()
+        {
+            try
+            {
+                var stockReport = new StringBuilder();
+                stockReport.AppendLine("CURRENT STOCK LEVELS");
+                stockReport.AppendLine("══════════════════════════════════");
+
+                using (SQLiteConnection conn = SQLiteHelper.GetConnection())
+                using (SQLiteCommand cmd = new SQLiteCommand(
+                    "SELECT ItemName, Quantity, Price FROM UniformItems ORDER BY ItemName", conn))
+                using (SQLiteDataReader reader = cmd.ExecuteReader())
+                {
+                    while (reader.Read())
+                    {
+                        string itemName = reader["ItemName"].ToString();
+                        int quantity = Convert.ToInt32(reader["Quantity"]);
+                        decimal price = Convert.ToDecimal(reader["Price"]);
+
+                        string status = quantity == 0 ? " [OUT OF STOCK]" :
+                                       quantity <= 5 ? " [LOW STOCK]" : "";
+
+                        stockReport.AppendLine($"{itemName,-25} {quantity,3} units  ${price:F2}{status}");
+                    }
+                }
+
+                MessageBox.Show(stockReport.ToString(), "Stock Report",
+                    MessageBoxButtons.OK, MessageBoxIcon.Information);
+            }
+            catch (Exception ex)
+            {
+                MessageBox.Show($"Error generating stock report: {ex.Message}",
+                    "Stock Report Error", MessageBoxButtons.OK, MessageBoxIcon.Error);
+            }
+        }
+
+        // Additional helper method to handle cart clearing with confirmation
+        private void ClearCartWithConfirmation()
+        {
+            if (dgvCart.Rows.Count > 0)
+            {
+                var result = MessageBox.Show(
+                    "Are you sure you want to clear all items from the cart?",
+                    "Clear Cart", MessageBoxButtons.YesNo, MessageBoxIcon.Question);
+
+                if (result == DialogResult.Yes)
+                {
+                    dgvCart.Rows.Clear();
+                    ClearReceiptDisplay();
+                    statusLabel.Text = "Cart cleared.";
+                    statusLabel.ForeColor = Color.Blue;
+                }
+            }
+        }
+}
 }
